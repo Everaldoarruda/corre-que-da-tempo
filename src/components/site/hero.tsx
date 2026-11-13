@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 import { motion } from "motion/react";
 import { animate, stagger } from "animejs";
 import { CalendarDays, Clock, MapPin, Shirt, ArrowDown } from "lucide-react";
@@ -102,7 +103,10 @@ export function Hero() {
           transition={{ delay: 0.6, duration: 0.7, type: "spring", bounce: 0.3 }}
           className="relative self-center border-4 border-brand bg-black p-6 shadow-[12px_12px_0_0_var(--brand)]"
         >
-          <p className="font-heading text-2xl text-brand">Próximo treino</p>
+          <div className="flex items-center gap-4">
+            <Image src="/img/logo.png" alt="Logo Corre que dá Tempo" width={96} height={96} priority className="size-20 shrink-0 rounded-full md:size-24" />
+            <p className="font-heading text-2xl text-brand">Próximo treino</p>
+          </div>
           <ul className="mt-4 space-y-4">
             <InfoRow icon={<CalendarDays />} label="Quando" value="Quarta-feira" />
             <InfoRow icon={<Clock />} label="Concentração / Saída" value={`${SITE.concentration} / ${SITE.start}`} />
