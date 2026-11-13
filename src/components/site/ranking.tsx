@@ -49,7 +49,7 @@ export function Ranking() {
 }
 
 const podiumOrder = [1, 0, 2]; // 2º, 1º, 3º
-const podiumHeight = ["h-28", "h-40", "h-20"];
+const podiumHeight = ["h-44", "h-32", "h-24"]; // índice = colocação (1º mais alto)
 const medalColor = ["text-brand", "text-zinc-300", "text-amber-700"];
 
 function Podium({ top3 }: { top3: Runner[] }) {
