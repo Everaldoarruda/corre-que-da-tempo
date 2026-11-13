@@ -32,7 +32,7 @@ Abra http://localhost:3000.
 1. **WhatsApp e endereço**: `src/lib/config.ts` (`whatsappNumber` está com um número de exemplo).
 2. **Ranking, loja, anúncios, patrocinadores, galeria**: `src/lib/data.ts` (dados de exemplo).
 3. **Imagens**: substitua os SVGs placeholder em `public/img/**` mantendo os nomes, ou gere novos com `node scripts/gen-placeholders.mjs`.
-4. **Logo oficial**: coloque em `public/img/logo.png` e troque `src/components/site/logo.tsx` por um `<Image />`.
+4. **Vídeo de fundo do hero**: coloque `hero.mp4` (e opcionalmente `hero.webm`) em `public/video/`. Enquanto o arquivo não existe, o hero usa a foto `public/img/grid.webp` como poster.
 
 ## Próximos passos sugeridos
 

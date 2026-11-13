@@ -34,8 +34,22 @@ export function Hero() {
 
   return (
     <section id="top" className="relative flex min-h-svh items-center overflow-hidden bg-grid pt-16">
-      {/* fundo */}
+      {/* fundo: vídeo em loop (public/video/hero.mp4) + camada escura para legibilidade */}
       <div className="pointer-events-none absolute inset-0">
+        <video
+          className="absolute inset-0 size-full object-cover opacity-40"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          poster="/img/grid.webp"
+          aria-hidden="true"
+        >
+          <source src="/video/hero.webm" type="video/webm" />
+          <source src="/video/hero.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/70 to-background" />
         <div className="absolute -left-40 top-20 size-[520px] rounded-full bg-brand/15 blur-3xl" />
         <div className="absolute -right-40 bottom-0 size-[420px] rounded-full bg-brand-dark/15 blur-3xl" />
         <div className="absolute inset-x-0 bottom-0 h-3 brand-stripe" />

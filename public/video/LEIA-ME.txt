@@ -1,0 +1,4 @@
+Coloque aqui o video de fundo do hero:
+- hero.mp4 (H.264, obrigatorio)
+- hero.webm (opcional, mais leve)
+Recomendado: 1920x1080, 10 a 20 segundos, sem audio, ate ~5 MB.
