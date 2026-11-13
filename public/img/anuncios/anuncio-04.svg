@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="500" viewBox="0 0 1200 500">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#141414"/><stop offset="1" stop-color="#3a3000"/></linearGradient></defs>
+  <rect width="1200" height="500" fill="url(#g)"/>
+  <rect x="0" y="486" width="1200" height="14" fill="#FFD400"/>
+  <text x="50%" y="48%" text-anchor="middle" font-family="Impact, Arial Black, sans-serif" font-size="80" fill="#FFD400" letter-spacing="2">ANÚNCIO 4</text>
+  <text x="50%" y="62%" text-anchor="middle" font-family="Arial, sans-serif" font-size="36" fill="#eee">Espaço do fornecedor</text>
+</svg>

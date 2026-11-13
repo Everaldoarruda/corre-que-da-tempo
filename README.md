@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Corre que dá Tempo — Landing page
 
-## Getting Started
+Site do treino de corrida noturna da Linha do Tiro (Recife/PE). Next.js 16 + Tailwind 4 + shadcn/ui, animações com [Motion](https://motion.dev) e [Anime.js](https://animejs.com), gráficos com shadcn Charts (Recharts).
 
-First, run the development server:
+## Rodar
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abra http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Seções
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Seção | Arquivo | Observações |
+| --- | --- | --- |
+| Navbar + WhatsApp | `src/components/site/navbar.tsx` | Menu mobile em Sheet |
+| Hero | `src/components/site/hero.tsx` | Título letra a letra (Anime.js), cartão do próximo treino (Motion) |
+| Números | `src/components/site/stats.tsx` | Contadores animados (Anime.js) |
+| Ranking | `src/components/site/ranking.tsx` + `ranking-charts.tsx` | Abas semana/mês, pódio animado, tabela e 2 gráficos |
+| Anúncios de fornecedores | `src/components/site/anuncios.tsx` | Carrossel com autoplay, aparece 2x no body |
+| Cadastro | `src/components/site/cadastro.tsx` | Salva no `localStorage` e abre WhatsApp com o resumo |
+| Galeria | `src/components/site/galeria.tsx` | Grid com lightbox (Dialog) |
+| Percurso | `src/components/site/percurso.tsx` + `route-map.tsx` | Mapa real (Leaflet/OpenStreetMap) com rota pelas ruas em `src/lib/route.ts`, desenhada com `svg.createDrawable` e corredor via `svg.createMotionPath` |
+| Loja | `src/components/site/loja.tsx` | Carrinho em Sheet, pedido finalizado via WhatsApp |
+| Contato | `src/components/site/contato.tsx` | CTA WhatsApp, atalhos para anunciante e patrocinador |
+| Footer | `src/components/site/footer.tsx` | Logos dos patrocinadores |
 
-## Learn More
+## O que personalizar
 
-To learn more about Next.js, take a look at the following resources:
+1. **WhatsApp e endereço**: `src/lib/config.ts` (`whatsappNumber` está com um número de exemplo).
+2. **Ranking, loja, anúncios, patrocinadores, galeria**: `src/lib/data.ts` (dados de exemplo).
+3. **Imagens**: substitua os SVGs placeholder em `public/img/**` mantendo os nomes, ou gere novos com `node scripts/gen-placeholders.mjs`.
+4. **Logo oficial**: coloque em `public/img/logo.png` e troque `src/components/site/logo.tsx` por um `<Image />`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Próximos passos sugeridos
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Backend para o cadastro e o ranking (ex.: Supabase ou Google Sheets) no lugar dos dados estáticos.
+- Pagamento online na loja (Pix / Mercado Pago) se não quiser fechar só pelo WhatsApp.
