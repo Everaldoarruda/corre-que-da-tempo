@@ -40,7 +40,7 @@ export function Ranking() {
 
       <Podium key={period} top3={top3} />
 
-      <div className="mt-12 grid gap-8 lg:grid-cols-[1.1fr_1fr]">
+      <div className="mt-12 grid gap-8 lg:grid-cols-[1.1fr_1fr] [&>*]:min-w-0">
         <RankingTable key={period} data={data} />
         <RankingCharts period={period} data={data} />
       </div>
@@ -75,7 +75,7 @@ function Podium({ top3 }: { top3: Runner[] }) {
   }, [top3]);
 
   return (
-    <div ref={ref} className="grid grid-cols-3 items-end gap-3 md:gap-6">
+    <div ref={ref} className="grid grid-cols-3 items-end gap-2 sm:gap-3 md:gap-6">
       {podiumOrder.map((idx) => {
         const r = top3[idx];
         if (!r) return null;
@@ -104,7 +104,7 @@ function Podium({ top3 }: { top3: Runner[] }) {
 
 function RankingTable({ data }: { data: Runner[] }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-card">
+    <div className="min-w-0 overflow-hidden rounded-xl border border-border bg-card">
       <div className="flex items-center gap-2 border-b border-border px-4 py-3">
         <Trophy className="size-4 text-brand" />
         <h3 className="font-heading text-lg">Classificação geral</h3>
@@ -112,11 +112,11 @@ function RankingTable({ data }: { data: Runner[] }) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-12">#</TableHead>
+            <TableHead className="w-10 px-2 sm:px-3">#</TableHead>
             <TableHead>Corredor(a)</TableHead>
             <TableHead className="hidden sm:table-cell">Bairro</TableHead>
-            <TableHead className="text-right">Tempo</TableHead>
-            <TableHead className="text-right">Pts</TableHead>
+            <TableHead className="px-2 text-right sm:px-3">Tempo</TableHead>
+            <TableHead className="px-2 text-right sm:px-3">Pts</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -130,10 +130,10 @@ function RankingTable({ data }: { data: Runner[] }) {
                 transition={{ delay: i * 0.05, duration: 0.4 }}
                 className="border-b border-border transition-colors last:border-0 hover:bg-muted/40"
               >
-                <TableCell className="font-heading text-lg text-brand">{i + 1}</TableCell>
+                <TableCell className="px-2 font-heading text-lg text-brand sm:px-3">{i + 1}</TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">{r.name}</span>
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span className="truncate font-medium">{r.name}</span>
                     <Delta delta={r.delta} />
                     <Badge variant="outline" className="hidden text-[10px] md:inline-flex">
                       {r.category === "Feminino" ? "F" : "M"}
@@ -141,8 +141,8 @@ function RankingTable({ data }: { data: Runner[] }) {
                   </div>
                 </TableCell>
                 <TableCell className="hidden text-muted-foreground sm:table-cell">{r.neighborhood}</TableCell>
-                <TableCell className="text-right font-mono">{formatTime(r.bestTimeSec)}</TableCell>
-                <TableCell className="text-right font-bold">{r.points}</TableCell>
+                <TableCell className="px-2 text-right font-mono text-xs sm:px-3 sm:text-sm">{formatTime(r.bestTimeSec)}</TableCell>
+                <TableCell className="px-2 text-right font-bold sm:px-3">{r.points}</TableCell>
               </motion.tr>
             ))}
           </AnimatePresence>

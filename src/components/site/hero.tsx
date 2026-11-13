@@ -61,7 +61,7 @@ export function Hero() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }}
-            className="mb-6 inline-flex items-center gap-2 border border-brand/50 bg-brand/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-brand"
+            className="mb-6 inline-flex items-center gap-2 border border-brand/50 bg-brand/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-brand sm:text-xs sm:tracking-[0.2em]"
           >
             <span className="size-2 animate-pulse rounded-full bg-brand" />
             Corrida noturna • Linha do Tiro • Recife
