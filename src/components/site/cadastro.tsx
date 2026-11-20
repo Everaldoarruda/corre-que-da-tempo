@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { motion } from "motion/react";
-import { CheckCircle2, Send, UserPlus } from "lucide-react";
+import { CheckCircle2, Send, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,22 +27,28 @@ const empty: Form = { nome: "", whatsapp: "", nascimento: "", bairro: "", catego
 export function Cadastro() {
   const [form, setForm] = useState<Form>(empty);
   const [done, setDone] = useState(false);
+  const [consent, setConsent] = useState(false);
 
   const set = (k: keyof Form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
+    if (!consent) return;
+    const consentAt = new Date().toISOString();
     // Guarda localmente (até existir um backend) e envia o resumo para a organização via WhatsApp.
     try {
       const prev = JSON.parse(localStorage.getItem("cqdt:cadastros") ?? "[]");
-      localStorage.setItem("cqdt:cadastros", JSON.stringify([...prev, { ...form, em: new Date().toISOString() }]));
+      localStorage.setItem("cqdt:cadastros", JSON.stringify([...prev, { ...form, em: consentAt, consentimentoLGPD: consentAt }]));
     } catch {}
     const msg =
       `*Cadastro Corre que dá Tempo*\n` +
       `Nome: ${form.nome}\nWhatsApp: ${form.whatsapp}\nNascimento: ${form.nascimento}\n` +
       `Bairro: ${form.bairro}\nCategoria: ${form.categoria}\nCamisa: ${form.tamanho}\nNível: ${form.nivel}\n` +
-      (form.obs ? `Obs: ${form.obs}` : "");
+      (form.obs ? `Obs: ${form.obs}
+` : "") +
+      `
+Consentimento LGPD: aceito em ${new Date(consentAt).toLocaleString("pt-BR")}`;
     window.open(whatsappLink(msg), "_blank", "noopener");
     setDone(true);
   }
@@ -80,7 +86,7 @@ export function Cadastro() {
                   <p className="mt-2 text-muted-foreground">
                     Finalize o envio no WhatsApp que abriu. Te esperamos na próxima quarta, de camisa preta.
                   </p>
-                  <Button variant="outline" className="mt-6" onClick={() => { setDone(false); setForm(empty); }}>
+                  <Button variant="outline" className="mt-6" onClick={() => { setDone(false); setForm(empty); setConsent(false); }}>
                     Novo cadastro
                   </Button>
                 </motion.div>
@@ -118,15 +124,33 @@ export function Cadastro() {
                     </NativeSelect>
                   </Field>
                   <Field label="Observações (opcional)" className="sm:col-span-2">
-                    <Textarea value={form.obs} onChange={set("obs")} placeholder="Alguma condição de saúde, restrição ou recado?" rows={3} />
+                    <Textarea value={form.obs} onChange={set("obs")} placeholder="Algum recado para a organização?" rows={3} />
+                    <span className="text-xs text-muted-foreground">
+                      Informações de saúde são dados sensíveis pela LGPD. Informe apenas se quiser que a equipe de apoio saiba.
+                    </span>
                   </Field>
-                  <Button type="submit" size="lg" className="h-12 font-bold sm:col-span-2">
+                  <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-black/30 p-3 text-xs leading-relaxed text-muted-foreground sm:col-span-2">
+                    <input
+                      type="checkbox"
+                      required
+                      checked={consent}
+                      onChange={(e) => setConsent(e.target.checked)}
+                      className="mt-0.5 size-4 shrink-0 accent-[var(--brand)]"
+                    />
+                    <span>
+                      Li e concordo com o uso dos meus dados (nome, WhatsApp, data de nascimento e bairro) apenas para organizar
+                      os treinos, avisos e o ranking, conforme a Lei Geral de Proteção de Dados (LGPD). Estou ciente de que os
+                      treinos são fotografados e que as fotos podem ser publicadas no site e nas redes sociais. Posso pedir a
+                      correção ou a exclusão dos meus dados e fotos a qualquer momento pelo WhatsApp da organização.
+                    </span>
+                  </label>
+                  <Button type="submit" size="lg" disabled={!consent} className="h-12 font-bold sm:col-span-2">
                     <Send data-icon="inline-start" />
                     Enviar cadastro
                   </Button>
                   <p className="text-center text-xs text-muted-foreground sm:col-span-2">
-                    <UserPlus className="mr-1 inline size-3" />
-                    Seus dados são usados apenas para organização dos treinos.
+                    <ShieldCheck className="mr-1 inline size-3" />
+                    Seus dados não são vendidos nem compartilhados com patrocinadores ou terceiros.
                   </p>
                 </form>
               )}

@@ -51,6 +51,20 @@ export function Footer() {
         <p className="mt-8 text-center text-xs text-muted-foreground">
           © 2026 Corre que dá Tempo. Esporte é saúde, é união, é vida!
         </p>
+        <p className="mx-auto mt-3 max-w-3xl text-center text-[11px] leading-relaxed text-muted-foreground/80">
+          <strong className="text-muted-foreground">Privacidade (LGPD):</strong> usamos os dados do cadastro apenas para
+          organizar os treinos, avisos e o ranking, sem vender ou compartilhar com terceiros. Os treinos são fotografados e
+          as fotos podem ser publicadas no site e nas redes sociais. Para corrigir ou excluir seus dados ou fotos,{" "}
+          <a
+            href={whatsappLink("Olá! Quero exercer meus direitos da LGPD: correção ou exclusão dos meus dados ou fotos.")}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-brand underline-offset-4 hover:underline"
+          >
+            fale com a organização pelo WhatsApp
+          </a>
+          .
+        </p>
       </div>
     </footer>
   );
