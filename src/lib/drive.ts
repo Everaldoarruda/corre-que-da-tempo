@@ -22,6 +22,7 @@ export async function listDrivePhotos(folderId: string = DRIVE_FOLDER_ID): Promi
   try {
     const key = process.env.GOOGLE_API_KEY;
     const photos = key ? await viaApi(folderId, key) : await viaEmbed(folderId);
+    console.info(`[galeria] ${photos.length} fotos lidas via ${key ? "Drive API oficial" : "listagem pública (sem GOOGLE_API_KEY)"}`);
     // Ordem do nome do arquivo = ordem em que a câmera fotografou
     return photos.sort((a, b) => a.name.localeCompare(b.name, "pt-BR", { numeric: true }));
   } catch (err) {
