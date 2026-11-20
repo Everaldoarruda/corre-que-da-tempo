@@ -77,7 +77,7 @@ await until(29.5); await scrollTo("#percurso");
 
 // LOJA 35.5–41.5
 await until(35.5); await scrollTo("#loja");
-await until(37.8); await page.evaluate(() => { const b=[...document.querySelectorAll("#loja button")].find(x=>x.textContent.includes("Adicionar")); b && b.click(); });
+await until(37.8); await page.evaluate(() => { const b=[...document.querySelectorAll("#loja button")].find(x=>x.textContent.includes("Adicionar")); if (b) b.click(); });
 await until(40.9); await page.keyboard.press("Escape");
 
 // ANÚNCIOS + PATROCINADORES 41.5–47.5

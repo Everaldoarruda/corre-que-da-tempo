@@ -42,3 +42,4 @@ next-env.d.ts
 
 # videos de marketing (pesados)
 /marketing/*.mp4
+!.env.example
