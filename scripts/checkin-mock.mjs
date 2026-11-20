@@ -90,6 +90,13 @@ if (ALWAYS_OPEN) {
     if (row[0] === "fecha") row[1] = "23:59";
   }
 }
+if (process.env.MOCK_CODIGO) {
+  // Simula o código do dia ligado na aba Config
+  for (const row of sheets.Config.data) {
+    if (row[0] === "exigir_codigo") row[1] = "SIM";
+    if (row[0] === "codigo") row[1] = process.env.MOCK_CODIGO;
+  }
+}
 
 // ---------- Servidor HTTP ----------
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

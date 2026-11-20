@@ -55,7 +55,11 @@ export function CheckinForm({ compact = false }: { compact?: boolean }) {
         setShowForm(false);
       }
     } catch {}
-    if (new URLSearchParams(window.location.search).get("origem") === "qr") setOrigem("qr");
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("origem") === "qr") setOrigem("qr");
+    // O QR Code da concentração pode trazer o código do dia: quem escaneia não precisa digitar
+    const codigoQr = params.get("c");
+    if (codigoQr) setCodigo(codigoQr.slice(0, 30));
     /* eslint-enable react-hooks/set-state-in-effect */
     load();
     // Só consulta com a tela visível: celular travado ou em outro app não gera acesso

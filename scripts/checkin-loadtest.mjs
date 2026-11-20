@@ -29,7 +29,7 @@ async function checkin(i) {
     try {
       const resp = await fetch(`${BASE}/api/checkin`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Origin: BASE },
         body: JSON.stringify({ tipo: i % 7 === 0 ? "Criança" : "Adulto", nome, responsavel: "Responsável Teste", consentimento: true, origem: "qr" }),
       });
       r = await resp.json();

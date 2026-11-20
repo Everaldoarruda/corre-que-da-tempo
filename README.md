@@ -69,6 +69,13 @@ CHECKIN_SECRET=o-valor-copiado-no-passo-3
 - **Mudar dia ou horário**: edite `dia_semana` (1 = segunda ... 7 = domingo), `abre` e `fecha` na aba `Config`.
 - **Atualizar o código do script**: cole a versão nova e use **Implantar > Gerenciar implantações > Editar > Nova versão**. A URL continua a mesma.
 
+### Segurança do check-in
+
+- **Só pelo site**: a rota `/api/checkin` recusa envios sem o cabeçalho `Origin` do próprio site (scripts e outros sites recebem 403).
+- **Excesso por endereço**: no máximo 40 envios por minuto do mesmo endereço de internet. O limite é folgado porque, na concentração, muitos celulares da mesma operadora podem sair pelo mesmo endereço. Para teste de carga local, use `CHECKIN_LIMITE_POR_IP=100000`.
+- **Check-in feito de casa**: ligue o código do dia. Na aba `Config`, coloque `exigir_codigo = SIM` e um `codigo` novo a cada treino. Em `/checkin/qr`, digite o mesmo código no campo "Código do dia": ele vai dentro do QR Code, quem escaneia não precisa digitar, e o código não aparece escrito no cartaz.
+- **Planilha**: privada, acessível só com `CHECKIN_SECRET`. Nomes que começam com `=`, `+`, `-` ou `@` são neutralizados para não virar fórmula.
+
 ### Capacidade (pico de check-ins)
 
 O Apps Script aceita cerca de 30 execuções simultâneas por conta. Para não chegar perto disso:
@@ -112,7 +119,7 @@ O fotógrafo só sobe as fotos na pasta do Drive. O site lê a pasta sozinho, se
 
 - **Pasta**: compartilhada como "Qualquer pessoa com o link pode ver". O ID fica em `DRIVE_FOLDER_ID` (veja `.env.example`).
 - **Formatos**: aceita JPG e também RAW (ARW, CR2, NEF...). O Google converte para JPEG automaticamente.
-- **Download**: o visitante baixa um JPEG de 2400px (cerca de 3 MB), direto do Google, sem gastar banda do site. Se falhar, a rota `/api/fotos/[id]` serve de reserva.
+- **Download**: o visitante baixa um JPEG de 2400px (cerca de 3 MB), direto do Google, sem gastar banda do site. Se falhar, a rota `/api/fotos/[id]` serve de reserva. Ela só aceita fotos que estão na pasta da galeria.
 - **Produção**: defina `GOOGLE_API_KEY` (Google Cloud, com a Google Drive API ativada). Sem a chave, o site usa a listagem pública da pasta, que funciona mas não é uma API oficial.
 
 ### Criar a chave da Google Drive API

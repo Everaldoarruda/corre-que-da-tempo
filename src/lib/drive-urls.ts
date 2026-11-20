@@ -19,5 +19,5 @@ export function driveDirectUrl(id: string, width: number) {
 
 /** Rota do próprio site que baixa a foto pelo servidor (reserva). */
 export function downloadProxyUrl(photo: DrivePhoto) {
-  return `/api/fotos/${photo.id}?nome=${encodeURIComponent(photo.name)}`;
+  return `/api/fotos/${photo.id}`;
 }
