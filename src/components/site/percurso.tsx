@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { Flag, MapPin, Route, Timer, Navigation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -58,10 +57,7 @@ export function Percurso() {
             </Reveal>
           ))}
           <Reveal delay={0.4}>
-            <div className="relative aspect-square overflow-hidden rounded-xl border border-border">
-              <Image src="/img/percurso.webp" alt="Arte oficial do roteiro da corrida" fill sizes="(min-width: 1024px) 33vw, 100vw" className="object-cover" />
-            </div>
-            <div className="mt-4 grid gap-2">
+            <div className="grid gap-2">
               <Button className="w-full font-semibold" size="lg" nativeButton={false} render={<a href={directionsUrl} target="_blank" rel="noopener noreferrer" />}>
                 <Route data-icon="inline-start" />
                 Ver trajeto no Google Maps
