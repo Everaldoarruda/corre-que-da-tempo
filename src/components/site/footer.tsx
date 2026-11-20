@@ -52,7 +52,7 @@ export function Footer() {
           © 2026 Corre que dá Tempo. Esporte é saúde, é união, é vida!
         </p>
         <p className="mx-auto mt-3 max-w-3xl text-center text-[11px] leading-relaxed text-muted-foreground/80">
-          <strong className="text-muted-foreground">Privacidade (LGPD):</strong> usamos os dados do cadastro apenas para
+          <strong className="text-muted-foreground">Privacidade (LGPD):</strong> usamos os dados do check-in apenas para
           organizar os treinos, avisos e o ranking, sem vender ou compartilhar com terceiros. Os treinos são fotografados e
           as fotos podem ser publicadas no site e nas redes sociais. Para corrigir ou excluir seus dados ou fotos,{" "}
           <a
@@ -65,6 +65,17 @@ export function Footer() {
           </a>
           .
         </p>
+
+        <div className="mt-10 flex flex-col items-center gap-2 border-t border-border pt-6 sm:flex-row sm:justify-center sm:gap-3">
+          <span className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Desenvolvido por</span>
+          <Image
+            src="/img/arv-tech.png"
+            alt="arv.tech"
+            width={629}
+            height={287}
+            className="h-16 w-auto rounded-lg ring-1 ring-white/10 sm:h-20 transition hover:ring-[#3b82f6]/60"
+          />
+        </div>
       </div>
     </footer>
   );
