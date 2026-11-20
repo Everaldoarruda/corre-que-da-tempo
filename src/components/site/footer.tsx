@@ -2,6 +2,7 @@ import Image from "next/image";
 import { MessageCircle } from "lucide-react";
 import { Instagram } from "./icons";
 import { Logo } from "./logo";
+import { ArvTechCredit } from "./arv-tech-credit";
 import { sponsors } from "@/lib/data";
 import { SITE, whatsappLink } from "@/lib/config";
 
@@ -68,13 +69,7 @@ export function Footer() {
 
         <div className="mt-10 flex flex-col items-center gap-2 border-t border-border pt-6 sm:flex-row sm:justify-center sm:gap-3">
           <span className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Desenvolvido por</span>
-          <Image
-            src="/img/arv-tech.png"
-            alt="arv.tech"
-            width={629}
-            height={287}
-            className="h-16 w-auto rounded-lg ring-1 ring-white/10 sm:h-20 transition hover:ring-[#3b82f6]/60"
-          />
+          <ArvTechCredit />
         </div>
       </div>
     </footer>
