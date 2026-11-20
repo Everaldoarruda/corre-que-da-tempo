@@ -11,7 +11,6 @@ export const SITE = {
   dayLabel: "Toda quarta-feira",
   concentration: "20:00h",
   start: "20:30h",
-  distanceKm: 4,
 };
 
 export function whatsappLink(message = SITE.whatsappMessage) {

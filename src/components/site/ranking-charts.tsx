@@ -1,48 +1,47 @@
 "use client";
 
-import { Bar, BarChart, CartesianGrid, Line, LineChart, XAxis, YAxis, LabelList } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, LabelList } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { monthlyEvolution, type Runner } from "@/lib/data";
+import { formatDataBR, type TreinoDia } from "@/lib/checkin-types";
+import type { RankRow } from "./ranking";
 
-const pointsConfig = {
-  points: { label: "Pontos", color: "var(--chart-1)" },
+const presencasConfig = {
+  presencas: { label: "Presenças", color: "var(--chart-1)" },
 } satisfies ChartConfig;
 
-const evolutionConfig = {
-  corredores: { label: "Corredores", color: "var(--chart-1)" },
-  tempoMedio: { label: "Tempo médio (min)", color: "var(--chart-3)" },
+const treinosConfig = {
+  adultos: { label: "Adultos", color: "var(--chart-1)" },
+  criancas: { label: "Crianças", color: "var(--chart-3)" },
 } satisfies ChartConfig;
 
-export function RankingCharts({ period, data }: { period: "semana" | "mes"; data: Runner[] }) {
-  const top5 = data.slice(0, 5).map((r) => ({
-    name: r.name.split(" ")[0],
-    points: r.points,
-  }));
+export function RankingCharts({ period, data, treinos }: { period: "mes" | "geral"; data: RankRow[]; treinos: TreinoDia[] }) {
+  const top5 = data.slice(0, 5).map((r) => ({ name: r.nome.split(" ")[0], presencas: r.presencas }));
+  const ultimos = treinos.slice(-10).map((t) => ({ ...t, label: formatDataBR(t.data) }));
 
   return (
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle className="font-heading text-lg">
-            Top 5 em pontos — {period === "semana" ? "semana" : "mês"}
-          </CardTitle>
-          <CardDescription>Pontuação acumulada dos cinco primeiros colocados.</CardDescription>
+          <CardTitle className="font-heading text-lg">Top 5 em presença: {period === "mes" ? "este mês" : "geral"}</CardTitle>
+          <CardDescription>Quem mais fez check-in nos treinos.</CardDescription>
         </CardHeader>
         <CardContent>
-          <ChartContainer config={pointsConfig} className="h-56 w-full">
+          <ChartContainer config={presencasConfig} className="h-56 w-full">
             <BarChart data={top5} layout="vertical" margin={{ left: 8, right: 32 }}>
               <CartesianGrid horizontal={false} />
-              <XAxis type="number" hide />
+              <XAxis type="number" hide allowDecimals={false} />
               <YAxis type="category" dataKey="name" tickLine={false} axisLine={false} width={80} />
               <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-              <Bar dataKey="points" fill="var(--color-points)" radius={4} isAnimationActive animationDuration={900}>
-                <LabelList dataKey="points" position="right" className="fill-foreground text-xs font-bold" />
+              <Bar dataKey="presencas" fill="var(--color-presencas)" radius={4} animationDuration={900}>
+                <LabelList dataKey="presencas" position="right" className="fill-foreground text-xs font-bold" />
               </Bar>
             </BarChart>
           </ChartContainer>
@@ -51,20 +50,22 @@ export function RankingCharts({ period, data }: { period: "semana" | "mes"; data
 
       <Card>
         <CardHeader>
-          <CardTitle className="font-heading text-lg">Evolução do mês</CardTitle>
-          <CardDescription>Corredores por treino e tempo médio nos 4 km.</CardDescription>
+          <CardTitle className="font-heading text-lg">Corredores por treino</CardTitle>
+          <CardDescription>Check-ins dos últimos {ultimos.length} treinos, adultos e crianças.</CardDescription>
         </CardHeader>
         <CardContent>
-          <ChartContainer config={evolutionConfig} className="h-56 w-full">
-            <LineChart data={monthlyEvolution} margin={{ left: 0, right: 12, top: 8 }}>
+          <ChartContainer config={treinosConfig} className="h-56 w-full">
+            <BarChart data={ultimos} margin={{ left: 0, right: 8, top: 16 }}>
               <CartesianGrid vertical={false} />
-              <XAxis dataKey="week" tickLine={false} axisLine={false} />
-              <YAxis yAxisId="left" tickLine={false} axisLine={false} width={32} />
-              <YAxis yAxisId="right" orientation="right" domain={[17, 20]} tickLine={false} axisLine={false} width={32} />
+              <XAxis dataKey="label" tickLine={false} axisLine={false} />
+              <YAxis tickLine={false} axisLine={false} width={32} allowDecimals={false} />
               <ChartTooltip content={<ChartTooltipContent />} />
-              <Line yAxisId="left" type="monotone" dataKey="corredores" stroke="var(--color-corredores)" strokeWidth={3} dot={{ r: 4 }} animationDuration={1200} />
-              <Line yAxisId="right" type="monotone" dataKey="tempoMedio" stroke="var(--color-tempoMedio)" strokeWidth={2} strokeDasharray="6 4" dot={{ r: 3 }} animationDuration={1200} />
-            </LineChart>
+              <ChartLegend content={<ChartLegendContent />} />
+              <Bar dataKey="adultos" stackId="a" fill="var(--color-adultos)" animationDuration={900} />
+              <Bar dataKey="criancas" stackId="a" fill="var(--color-criancas)" radius={[4, 4, 0, 0]} animationDuration={900}>
+                <LabelList dataKey="total" position="top" className="fill-foreground text-xs font-bold" />
+              </Bar>
+            </BarChart>
           </ChartContainer>
         </CardContent>
       </Card>

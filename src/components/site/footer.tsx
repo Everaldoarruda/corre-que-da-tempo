@@ -37,7 +37,7 @@ export function Footer() {
           </div>
           <nav className="flex flex-wrap justify-center gap-5 text-sm text-muted-foreground">
             <a href="#ranking" className="hover:text-brand">Ranking</a>
-            <a href="#cadastro" className="hover:text-brand">Cadastro</a>
+            <a href="#checkin" className="hover:text-brand">Check-in</a>
             <a href="#galeria" className="hover:text-brand">Galeria</a>
             <a href="#percurso" className="hover:text-brand">Percurso</a>
             <a href="#loja" className="hover:text-brand">Loja</a>

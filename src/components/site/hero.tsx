@@ -6,6 +6,9 @@ import { motion } from "motion/react";
 import { animate, stagger } from "animejs";
 import { CalendarDays, Clock, MapPin, Shirt, ArrowDown } from "lucide-react";
 import { Instagram } from "./icons";
+import { ROUTE_DISTANCE_M } from "@/lib/route";
+
+const distanceKm = (ROUTE_DISTANCE_M / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 });
 import { Button } from "@/components/ui/button";
 import { SITE } from "@/lib/config";
 
@@ -82,7 +85,7 @@ export function Hero() {
             className="mt-6 max-w-xl text-lg text-muted-foreground md:text-xl"
           >
             Esporte, saúde e diversão. Todas as quartas o paredão puxa e a Zona Norte corre junto:
-            4 km do Campo do Café até a Praça da Convenção e volta.
+            {distanceKm} km do Campo do Café até a Praça da Convenção e volta.
           </motion.p>
 
           <motion.div
@@ -91,8 +94,8 @@ export function Hero() {
             transition={{ delay: 1.1, duration: 0.6 }}
             className="mt-8 flex flex-wrap gap-3"
           >
-            <Button size="lg" className="h-12 px-6 text-base font-bold" nativeButton={false} render={<a href="#cadastro" />}>
-              Quero correr
+            <Button size="lg" className="h-12 px-6 text-base font-bold" nativeButton={false} render={<a href="#checkin" />}>
+              Fazer check-in
             </Button>
             <Button size="lg" variant="outline" className="h-12 px-6 text-base font-semibold" nativeButton={false} render={<a href="#ranking" />}>
               Ver ranking

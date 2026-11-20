@@ -63,9 +63,9 @@ await until(11.5); await scrollTo("#ranking");
 await until(14.5); await clickText("Melhores do mês");
 await until(16.3); await scrollBy(520);
 
-// CADASTRO 18.5–24.5
-await until(18.5); await scrollTo("#cadastro");
-await until(21.5); await page.click('#cadastro input[placeholder="Seu nome"]').catch(() => {});
+// CHECK-IN 18.5–24.5
+await until(18.5); await scrollTo("#checkin");
+await until(21.5); await page.click('#checkin-nome').catch(() => {});
 await page.keyboard.type("Maria Silva", { delay: 70 });
 
 // GALERIA 24.5–29.5

@@ -10,7 +10,7 @@ import { whatsappLink } from "@/lib/config";
 
 const links = [
   { href: "#ranking", label: "Ranking" },
-  { href: "#cadastro", label: "Cadastro" },
+  { href: "#checkin", label: "Check-in" },
   { href: "#galeria", label: "Galeria" },
   { href: "#percurso", label: "Percurso" },
   { href: "#loja", label: "Loja" },

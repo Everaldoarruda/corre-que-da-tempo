@@ -17,15 +17,67 @@ Abra http://localhost:3000.
 | --- | --- | --- |
 | Navbar + WhatsApp | `src/components/site/navbar.tsx` | Menu mobile em Sheet |
 | Hero | `src/components/site/hero.tsx` | Título letra a letra (Anime.js), cartão do próximo treino (Motion) |
-| Números | `src/components/site/stats.tsx` | Contadores animados (Anime.js) |
-| Ranking | `src/components/site/ranking.tsx` + `ranking-charts.tsx` | Abas semana/mês, pódio animado, tabela e 2 gráficos |
+| Números | `src/components/site/stats.tsx` + `live-sections.tsx` | Seguidores (aba Config), corredores no último treino e treinos realizados (check-in), percurso (mapa). Animados com Anime.js |
+| Ranking | `src/components/site/ranking.tsx` + `ranking-charts.tsx` | Ranking de presença (este mês / geral) vindo do check-in, pódio animado, lista de presença e 2 gráficos |
 | Anúncios de fornecedores | `src/components/site/anuncios.tsx` | Carrossel com autoplay, aparece 2x no body |
-| Cadastro | `src/components/site/cadastro.tsx` | Salva no `localStorage` e abre WhatsApp com o resumo |
+| Check-in | `src/components/site/checkin-section.tsx` + `checkin-form.tsx` | Substitui o cadastro. Nome ou apelido, adulto ou criança, grava na planilha. Também em `/checkin` (QR Code) |
 | Galeria | `src/components/site/galeria.tsx` + `galeria-grid.tsx` | Lê a pasta pública do Google Drive a cada 5 min, grid paginado, visualizador e botão de baixar |
 | Percurso | `src/components/site/percurso.tsx` + `route-map.tsx` | Mapa real (Leaflet/OpenStreetMap) com rota pelas ruas em `src/lib/route.ts`, desenhada com `svg.createDrawable` e corredor via `svg.createMotionPath` |
 | Loja | `src/components/site/loja.tsx` | Carrinho em Sheet, pedido finalizado via WhatsApp |
 | Contato | `src/components/site/contato.tsx` | CTA WhatsApp, atalhos para anunciante e patrocinador |
 | Footer | `src/components/site/footer.tsx` | Logos dos patrocinadores |
+
+## Check-in (planilha do Google)
+
+Na concentração, o corredor aponta a câmera para o QR Code ou abre a seção Check-in do site, digita o nome ou apelido, escolhe adulto ou criança e confirma. O celular lembra o nome: na semana seguinte é um toque só.
+
+Cada check-in vira uma linha numa planilha do Google, gravada por um Apps Script. Sem banco de dados. A partir dela o site calcula:
+
+- **Corredores no último treino** e **treinos realizados** (faixa de números do topo).
+- **Ranking de presença** do mês e geral, com pódio e lista de presença.
+- **Gráfico de corredores por treino**, separando adultos e crianças.
+
+Regras aplicadas pelo script:
+
+- Abre só no dia e horário da aba `Config` (padrão: quarta, 19:30 às 21:30, horário de Recife).
+- O mesmo nome conta uma vez por dia, ignorando acentos e maiúsculas.
+- Criança exige o nome do responsável. O nome da criança fica só na planilha: o site recebe apenas a contagem (LGPD).
+- Código do dia opcional: com `exigir_codigo = SIM` na aba `Config`, o corredor digita o código anunciado na concentração.
+
+### Instalar a planilha (uma vez)
+
+1. Crie uma planilha nova no Google Sheets (ex.: "Check-in Corre que dá Tempo"). Ela pode continuar **privada**.
+2. Abra **Extensões > Apps Script**, apague o conteúdo e cole o arquivo `integrations/apps-script/checkin.gs`. Salve.
+3. No seletor de funções, escolha **setup** e clique em **Executar**. Autorize o acesso à planilha. O registro de execução mostra `CHECKIN_SECRET = ...`: copie esse valor.
+4. Clique em **Implantar > Nova implantação**, tipo **App da Web**. Executar como: **Eu**. Quem pode acessar: **Qualquer pessoa**. Clique em **Implantar** e copie a URL que termina em `/exec`.
+5. No `.env.local` (e na hospedagem), preencha:
+
+```
+CHECKIN_SCRIPT_URL=https://script.google.com/macros/s/.../exec
+CHECKIN_SECRET=o-valor-copiado-no-passo-3
+```
+
+6. Reinicie o site. A seção Check-in mostra "Check-in aberto agora" no dia e horário configurados.
+
+"Qualquer pessoa" no passo 4 só permite chamar o script. Sem o segredo, ele não lê nem grava nada, e a planilha continua privada.
+
+### Uso no dia a dia
+
+- **QR Code**: abra `/checkin/qr` no site e imprima o cartaz, ou mostre na tela do celular. Ele aponta para `/checkin?origem=qr`.
+- **Corrigir um check-in**: apague ou edite a linha na aba `Presencas`. O site atualiza em até 1 minuto.
+- **Seguidores do Instagram**: atualize `seguidores_instagram` na aba `Config`.
+- **Mudar dia ou horário**: edite `dia_semana` (1 = segunda ... 7 = domingo), `abre` e `fecha` na aba `Config`.
+- **Atualizar o código do script**: cole a versão nova e use **Implantar > Gerenciar implantações > Editar > Nova versão**. A URL continua a mesma.
+
+### Testar sem a planilha
+
+O simulador roda o mesmo `checkin.gs` com uma planilha em memória, sempre aberto:
+
+```bash
+npm run checkin:mock
+```
+
+E no `.env.local`: `CHECKIN_SCRIPT_URL=http://localhost:4010` e `CHECKIN_SECRET=dev-secret`. Os dados somem ao parar o simulador.
 
 ## Galeria pelo Google Drive
 
@@ -78,12 +130,12 @@ Se a chave for apagada, a galeria continua funcionando pela listagem pública da
 
 ## O que personalizar
 
+1. **Check-in**: `CHECKIN_SCRIPT_URL` e `CHECKIN_SECRET` (veja a seção Check-in).
 1. **WhatsApp e endereço**: `src/lib/config.ts` (`whatsappNumber` está com um número de exemplo).
-2. **Ranking, loja, anúncios, patrocinadores, galeria**: `src/lib/data.ts` (dados de exemplo).
+2. **Loja, anúncios e patrocinadores**: `src/lib/data.ts` (dados de exemplo).
 3. **Imagens**: substitua os SVGs placeholder em `public/img/**` mantendo os nomes, ou gere novos com `node scripts/gen-placeholders.mjs`.
 4. **Vídeo de fundo do hero**: coloque `hero.mp4` (e opcionalmente `hero.webm`) em `public/video/`. Enquanto o arquivo não existe, o hero usa a foto `public/img/grid.webp` como poster.
 
 ## Próximos passos sugeridos
 
-- Backend para o cadastro e o ranking (ex.: Supabase ou Google Sheets) no lugar dos dados estáticos.
 - Pagamento online na loja (Pix / Mercado Pago) se não quiser fechar só pelo WhatsApp.
