@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Mail, MessageCircle } from "lucide-react";
+import { Instagram } from "./icons";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
@@ -9,14 +9,10 @@ import { Button } from "@/components/ui/button";
 const DEV = {
   nome: "Everaldo Arruda",
   cargo: "Desenvolvedor",
-  fone: "(81) 99697-8550",
-  whatsapp: "5581996978550",
-  email: "dev.ejmarf@gmail.com",
+  instagram: "programaldo",
 };
 
-const whatsappDev = `https://wa.me/${DEV.whatsapp}?text=${encodeURIComponent(
-  "Olá, Everaldo! Vi o site do Corre que dá Tempo e quero falar sobre um projeto.",
-)}`;
+const instagramUrl = `https://www.instagram.com/${DEV.instagram}/`;
 
 /** Crédito no rodapé: a logo abre o cartão de visitas da arv.tech. */
 export function ArvTechCredit() {
@@ -43,7 +39,7 @@ export function ArvTechCredit() {
       <DialogContent className="w-[calc(100%-1.5rem)] max-w-xl overflow-hidden border-[#1e2a4a] bg-[#0b1735] p-0 sm:max-w-xl" showCloseButton>
         <DialogTitle className="sr-only">Cartão de visitas: {DEV.nome}, arv.tech</DialogTitle>
         <DialogDescription className="sr-only">
-          {DEV.cargo}. Telefone {DEV.fone}. E-mail {DEV.email}.
+          {DEV.cargo}. Instagram @{DEV.instagram}.
         </DialogDescription>
 
         <div className="relative px-5 pb-4 pt-10 sm:px-8 sm:pt-12">
@@ -51,23 +47,14 @@ export function ArvTechCredit() {
           <CodeCard />
         </div>
 
-        <div className="grid grid-cols-1 gap-2 border-t border-white/10 bg-black/20 p-4 sm:grid-cols-2">
+        <div className="border-t border-white/10 bg-black/20 p-4">
           <Button
             nativeButton={false}
-            render={<a href={whatsappDev} target="_blank" rel="noopener noreferrer" />}
-            className="h-11 bg-[#25D366] font-semibold text-black hover:bg-[#1ebe5b]"
+            render={<a href={instagramUrl} target="_blank" rel="noopener noreferrer" />}
+            className="h-11 w-full bg-gradient-to-r from-[#3b6ef5] to-[#2dd4bf] font-semibold text-[#0b1735] hover:opacity-90"
           >
-            <MessageCircle data-icon="inline-start" />
-            Chamar no WhatsApp
-          </Button>
-          <Button
-            nativeButton={false}
-            render={<a href={`mailto:${DEV.email}?subject=${encodeURIComponent("Projeto de site")}`} />}
-            variant="outline"
-            className="h-11 border-[#3b82f6]/50 font-semibold text-[#93b4ff] hover:bg-[#3b82f6]/10"
-          >
-            <Mail data-icon="inline-start" />
-            Enviar e-mail
+            <Instagram data-icon="inline-start" />
+            Seguir @{DEV.instagram} no Instagram
           </Button>
         </div>
       </DialogContent>
@@ -81,8 +68,7 @@ function CodeCard() {
     <Punct key="o">{"{"}</Punct>,
     <Entry key="n" k="nome" v={DEV.nome} />,
     <Entry key="c" k="cargo" v={DEV.cargo} />,
-    <Entry key="f" k="fone" v={DEV.fone} href={whatsappDev} external />,
-    <Entry key="e" k="email" v={DEV.email} href={`mailto:${DEV.email}`} last />,
+    <Entry key="i" k="instagram" v={`@${DEV.instagram}`} href={instagramUrl} external last />,
     <Punct key="c2">{"}"}</Punct>,
   ];
   return (
