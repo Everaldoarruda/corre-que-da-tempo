@@ -69,6 +69,33 @@ CHECKIN_SECRET=o-valor-copiado-no-passo-3
 - **Mudar dia ou horário**: edite `dia_semana` (1 = segunda ... 7 = domingo), `abre` e `fecha` na aba `Config`.
 - **Atualizar o código do script**: cole a versão nova e use **Implantar > Gerenciar implantações > Editar > Nova versão**. A URL continua a mesma.
 
+### Capacidade (pico de check-ins)
+
+O Apps Script aceita cerca de 30 execuções simultâneas por conta. Para não chegar perto disso:
+
+- **Consultas**: a contagem que os celulares mostram fica em cache por 15 s no servidor e na CDN da Vercel. A página só consulta com a tela visível, a cada 30 s.
+- **Gravações em lote**: o servidor junta os check-ins que chegam no mesmo instante (até 25) e grava todos numa única execução do script.
+- **Novas tentativas**: se a planilha estiver ocupada, o celular tenta de novo sozinho (2 s, 4 s e 7 s). Repetir é seguro: o mesmo nome no mesmo dia nunca conta duas vezes.
+- **Script antigo**: se a planilha ainda tiver a versão sem lotes, o site detecta e envia um por vez.
+
+Resultado no simulador, com gravações mais lentas que as do Google:
+
+| Cenário | Confirmados | Mais lento | Execuções simultâneas no Google |
+| --- | --- | --- | --- |
+| 200 pessoas em 2 min, 200 telas abertas | 200 de 200 | 4,4 s | 2 |
+| 200 pessoas em 20 s | 200 de 200 | 5,8 s | 2 |
+| Os mesmos 200 tocando de novo | 200 como "já registrado" | | |
+
+Para repetir o teste (simulador em um terminal, site de produção local em outro):
+
+```bash
+npm run checkin:mock
+npm run build && npx next start -p 3100
+node scripts/checkin-loadtest.mjs --url http://localhost:3100 --n 200 --janela 120 --telas 200 --mock http://localhost:4010
+```
+
+O site precisa de `CHECKIN_SCRIPT_URL=http://localhost:4010` e `CHECKIN_SECRET=dev-secret` para apontar para o simulador.
+
 ### Testar sem a planilha
 
 O simulador roda o mesmo `checkin.gs` com uma planilha em memória, sempre aberto:

@@ -16,6 +16,9 @@
  */
 
 var TZ = 'America/Recife';
+var STATS_CACHE_KEY = 'stats';
+var RECENT_ROWS = 3000;
+var VERSAO = 2; // 2 = aceita lotes de check-in
 var SHEET_PRESENCAS = 'Presencas';
 var SHEET_CONFIG = 'Config';
 var HEADERS = ['Data', 'Hora', 'Nome', 'Tipo', 'Responsavel', 'Chave', 'Origem'];
@@ -46,8 +49,14 @@ function setup() {
 function doGet(e) {
   var p = (e && e.parameter) || {};
   if (!authorized_(p.secret)) return json_({ ok: false, erro: 'nao_autorizado' });
+  // Cache de 10 s: muitas consultas seguidas leem a planilha uma vez só
+  var cache = CacheService.getScriptCache();
+  var cached = cache.get(STATS_CACHE_KEY);
+  if (cached) return text_(cached);
   var ss = ensureSheets_();
-  return json_(buildStats(readRows_(ss), readConfig_(ss), new Date()));
+  var out = JSON.stringify(buildStats(readRows_(ss), readConfig_(ss), new Date()));
+  if (out.length < 90000) cache.put(STATS_CACHE_KEY, out, 10);
+  return text_(out);
 }
 
 function doPost(e) {
@@ -59,24 +68,58 @@ function doPost(e) {
   }
   if (!authorized_(body.secret)) return json_({ ok: false, erro: 'nao_autorizado' });
 
+  // Aceita um check-in ({tipo, nome, ...}) ou um lote ({itens: [...]}) enviado pelo site
+  var batch = Array.isArray(body.itens);
+  var items = batch ? body.itens.slice(0, 100) : [body];
+
+  var ss = ensureSheets_();
+  var config = readConfig_(ss);
+  var now = new Date();
+  // Fora do horário: responde sem entrar na fila de gravação
+  if (!isOpen(config, now)) {
+    var fechado = validateCheckin(items[0] || {}, [], config, now);
+    return json_(batch ? { ok: true, versao: VERSAO, resultados: items.map(function () { return fechado; }) } : fechado);
+  }
+
   var lock = LockService.getScriptLock();
-  lock.waitLock(10000);
+  if (!lock.tryLock(30000)) {
+    var ocupado = { ok: false, erro: 'ocupado', mensagem: 'Muita gente fazendo check-in agora. Tente de novo em instantes.' };
+    return json_(batch ? { ok: false, erro: 'ocupado', resultados: items.map(function () { return ocupado; }) } : ocupado);
+  }
   try {
-    var ss = ensureSheets_();
-    var config = readConfig_(ss);
-    var rows = readRows_(ss);
-    var now = new Date();
-    var result = validateCheckin(body, rows, config, now);
-    if (!result.ok) return json_(result);
-    if (!result.duplicado) {
-      ss.getSheetByName(SHEET_PRESENCAS).appendRow(result.row);
-      rows.push(rowToObj_(result.row));
+    // Só as linhas mais recentes: os check-ins de hoje estão sempre no fim da planilha
+    var rows = readRecentRows_(ss, RECENT_ROWS);
+    var processed = processItems(items, rows, config, now);
+    if (processed.newRows.length) {
+      // Uma única escrita para o lote inteiro
+      var sheet = ss.getSheetByName(SHEET_PRESENCAS);
+      sheet.getRange(sheet.getLastRow() + 1, 1, processed.newRows.length, HEADERS.length).setValues(processed.newRows);
+      CacheService.getScriptCache().remove(STATS_CACHE_KEY);
     }
-    var stats = buildStats(rows, config, now);
-    return json_({ ok: true, duplicado: !!result.duplicado, nome: result.nome, tipo: result.tipo, hoje: stats.hoje });
+    return json_(batch ? { ok: true, versao: VERSAO, resultados: processed.results } : processed.results[0]);
   } finally {
     lock.releaseLock();
   }
+}
+
+/** Valida cada item contra as linhas existentes e contra os itens anteriores do mesmo lote. */
+function processItems(items, rows, config, now) {
+  var newRows = [];
+  var results = items.map(function (item) {
+    var result = validateCheckin(item, rows, config, now);
+    if (result.ok && !result.duplicado) {
+      newRows.push(result.row);
+      rows.push(rowToObj_(result.row));
+    }
+    return result;
+  });
+  var hoje = buildStats(rows, config, now).hoje;
+  return {
+    newRows: newRows,
+    results: results.map(function (r) {
+      return r.ok ? { ok: true, duplicado: !!r.duplicado, nome: r.nome, tipo: r.tipo, hoje: hoje } : r;
+    }),
+  };
 }
 
 /* ===================== Regras (funções puras) ===================== */
@@ -177,6 +220,7 @@ function buildStats(rows, config, now) {
 
   return {
     ok: true,
+    versao: VERSAO,
     atualizadoEm: now.toISOString(),
     aberto: isOpen(config, now),
     exigeCodigo: String(config.exigir_codigo).toUpperCase() === 'SIM',
@@ -222,6 +266,14 @@ function readRows_(ss) {
   return values.slice(1).map(rowToObj_).filter(function (r) { return r.data; });
 }
 
+function readRecentRows_(ss, n) {
+  var sheet = ss.getSheetByName(SHEET_PRESENCAS);
+  var last = sheet.getLastRow();
+  if (last < 2) return [];
+  var start = Math.max(2, last - n + 1);
+  return sheet.getRange(start, 1, last - start + 1, HEADERS.length).getDisplayValues().map(rowToObj_).filter(function (r) { return r.data; });
+}
+
 function rowToObj_(r) {
   return { data: String(r[0]).trim(), hora: r[1], nome: r[2], tipo: r[3], responsavel: r[4], chave: r[5] || ('a:' + normalize(r[2])), origem: r[6] };
 }
@@ -243,7 +295,11 @@ function authorized_(secret) {
 }
 
 function json_(obj) {
-  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+  return text_(JSON.stringify(obj));
+}
+
+function text_(s) {
+  return ContentService.createTextOutput(s).setMimeType(ContentService.MimeType.JSON);
 }
 
 function diaNome_(n) {

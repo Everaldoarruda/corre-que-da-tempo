@@ -13,6 +13,11 @@ import { DIAS, type CheckinPublic, type CheckinResult } from "@/lib/checkin-type
 type Tipo = "Adulto" | "Criança";
 type Perfil = { nome: string };
 const PERFIL_KEY = "cqdt:checkin:perfil";
+/** Intervalo de atualização da contagem enquanto a tela está visível. */
+const POLL_MS = 30_000;
+/** Tentativas automáticas quando a planilha está ocupada (pico de check-ins). */
+const RETRY_DELAYS_MS = [2_000, 4_000, 7_000];
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export function CheckinForm({ compact = false }: { compact?: boolean }) {
   const [state, setState] = useState<CheckinPublic | null>(null);
@@ -27,12 +32,13 @@ export function CheckinForm({ compact = false }: { compact?: boolean }) {
   const [showForm, setShowForm] = useState(true);
 
   const [busy, setBusy] = useState(false);
+  const [tentativa, setTentativa] = useState(0);
   const [erro, setErro] = useState<string | null>(null);
   const [done, setDone] = useState<Extract<CheckinResult, { ok: true }> | null>(null);
 
   const load = useCallback(async () => {
     try {
-      const res = await fetch("/api/checkin", { cache: "no-store" });
+      const res = await fetch("/api/checkin");
       setState((await res.json()) as CheckinPublic);
     } catch {
       /* mantém o último estado */
@@ -52,22 +58,47 @@ export function CheckinForm({ compact = false }: { compact?: boolean }) {
     if (new URLSearchParams(window.location.search).get("origem") === "qr") setOrigem("qr");
     /* eslint-enable react-hooks/set-state-in-effect */
     load();
-    const id = setInterval(load, 20_000);
-    return () => clearInterval(id);
+    // Só consulta com a tela visível: celular travado ou em outro app não gera acesso
+    const id = setInterval(() => {
+      if (document.visibilityState === "visible") load();
+    }, POLL_MS);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") load();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, [load]);
 
   async function enviar(payload: { tipo: Tipo; nome: string; responsavel?: string }) {
     setBusy(true);
     setErro(null);
     try {
-      const res = await fetch("/api/checkin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...payload, codigo, consentimento: true, origem }),
-      });
-      const result = (await res.json()) as CheckinResult;
-      if (!result.ok) {
-        setErro(result.mensagem ?? "Não foi possível fazer o check-in.");
+      let result: CheckinResult | null = null;
+      for (let i = 0; i <= RETRY_DELAYS_MS.length; i++) {
+        setTentativa(i);
+        try {
+          const res = await fetch("/api/checkin", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...payload, codigo, consentimento: true, origem }),
+          });
+          result = (await res.json()) as CheckinResult;
+        } catch {
+          result = { ok: false, erro: "ocupado", mensagem: "Sem conexão. Tentando de novo..." };
+        }
+        // Repetir é seguro: o mesmo nome no mesmo dia nunca conta duas vezes
+        if (result.ok || result.erro !== "ocupado" || i === RETRY_DELAYS_MS.length) break;
+        await sleep(RETRY_DELAYS_MS[i]);
+      }
+      if (!result || !result.ok) {
+        setErro(
+          result?.erro === "ocupado"
+            ? "A planilha está muito ocupada agora. Espere um minuto e toque de novo: seu check-in não será duplicado."
+            : (result?.mensagem ?? "Não foi possível fazer o check-in."),
+        );
         return;
       }
       if (payload.tipo === "Adulto") {
@@ -75,12 +106,12 @@ export function CheckinForm({ compact = false }: { compact?: boolean }) {
         localStorage.setItem(PERFIL_KEY, JSON.stringify(p));
         setPerfil(p);
       }
-      setDone(result);
-      setState((s) => (s ? { ...s, hoje: result.hoje } : s));
-    } catch {
-      setErro("Sem conexão. Tente de novo em instantes.");
+      const ok = result;
+      setDone(ok);
+      setState((s) => (s ? { ...s, hoje: ok.hoje } : s));
     } finally {
       setBusy(false);
+      setTentativa(0);
     }
   }
 
@@ -152,7 +183,7 @@ export function CheckinForm({ compact = false }: { compact?: boolean }) {
                 onClick={() => enviar({ tipo: "Adulto", nome: perfil.nome })}
               >
                 {busy ? <Loader2 className="animate-spin" data-icon="inline-start" /> : <CheckCircle2 data-icon="inline-start" />}
-                Sou {perfil.nome}, fazer check-in
+                {busy && tentativa > 0 ? `Tentando de novo (${tentativa + 1}/${RETRY_DELAYS_MS.length + 1})...` : `Sou ${perfil.nome}, fazer check-in`}
               </Button>
               {state?.exigeCodigo && (
                 <div className="mt-3 grid gap-1.5">
@@ -264,7 +295,11 @@ export function CheckinForm({ compact = false }: { compact?: boolean }) {
 
               <Button type="submit" size="lg" disabled={!podeEnviar || busy} className="h-14 text-base font-bold">
                 {busy ? <Loader2 className="animate-spin" data-icon="inline-start" /> : <CheckCircle2 data-icon="inline-start" />}
-                {aberto ? "Cheguei! Fazer check-in" : "Check-in fechado agora"}
+                {busy && tentativa > 0
+                  ? `Tentando de novo (${tentativa + 1}/${RETRY_DELAYS_MS.length + 1})...`
+                  : aberto
+                    ? "Cheguei! Fazer check-in"
+                    : "Check-in fechado agora"}
               </Button>
             </motion.form>
           )}

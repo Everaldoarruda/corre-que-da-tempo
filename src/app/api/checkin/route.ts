@@ -1,11 +1,17 @@
 import { revalidateTag } from "next/cache";
-import { CHECKIN_TAG, fetchCheckinStatsLive, postCheckin, toPublic } from "@/lib/checkin";
+import { CHECKIN_TAG, getCheckinStatsShared, postCheckin, toPublic, updateSharedToday } from "@/lib/checkin";
 import type { CheckinPayload } from "@/lib/checkin-types";
 
 /** Estado atual do check-in (aberto, contagem de hoje, nomes para sugestão). */
 export async function GET() {
-  const stats = await fetchCheckinStatsLive();
-  return Response.json(toPublic(stats), { headers: { "Cache-Control": "no-store" } });
+  const stats = await getCheckinStatsShared();
+  return Response.json(toPublic(stats), {
+    headers: {
+      // A CDN da Vercel serve a mesma resposta a todos por 15 s
+      "Cache-Control": "public, max-age=0, must-revalidate",
+      "CDN-Cache-Control": "public, s-maxage=15, stale-while-revalidate=30",
+    },
+  });
 }
 
 /** Registra um check-in na planilha. */
@@ -28,6 +34,10 @@ export async function POST(request: Request) {
   };
 
   const result = await postCheckin(payload);
-  if (result.ok && !result.duplicado) revalidateTag(CHECKIN_TAG, "max");
-  return Response.json(result, { status: result.ok ? 200 : 422, headers: { "Cache-Control": "no-store" } });
+  if (result.ok) {
+    updateSharedToday(result.hoje);
+    if (!result.duplicado) revalidateTag(CHECKIN_TAG, "max");
+  }
+  const status = result.ok ? 200 : result.erro === "ocupado" ? 503 : 422;
+  return Response.json(result, { status, headers: { "Cache-Control": "no-store" } });
 }
